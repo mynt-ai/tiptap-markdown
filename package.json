@@ -9,7 +9,8 @@
     "build:example": "vite build example",
     "preview": "vite preview example",
     "preversion": "npm run build",
-    "update:tiptap": "update-by-scope @tiptap"
+    "update:tiptap": "update-by-scope @tiptap",
+    "prepare": "npm run build"
   },
   "workspaces": [
     "example"
