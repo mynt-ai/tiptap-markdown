@@ -37,6 +37,7 @@
     import content from '../data/content.md?raw';
     import Highlight from "../extensions/highlight";
     import Container from "../extensions/container";
+        import LineNums from "../extensions/linenums";
     import { common, createLowlight } from 'lowlight';
 
     const lowlight = createLowlight(common);
@@ -71,6 +72,7 @@
                     StarterKit.configure({
                         codeBlock: false,
                     }),
+                                    LineNums,
                     Table.configure({
                         resizable: false,
                     }),

@@ -28,6 +28,7 @@ export class MarkdownParser {
             );
 
             const renderedHTML = this.md.render(content);
+            
             const element = elementFromString(renderedHTML);
 
             this.editor.extensionManager.extensions.forEach(extension =>
@@ -115,11 +116,35 @@ export class MarkdownParser {
             return rendered;
         }
 
+
         md.renderer.rules.hardbreak = withoutNewLine(md.renderer.rules.hardbreak);
         md.renderer.rules.softbreak = withoutNewLine(md.renderer.rules.softbreak);
         md.renderer.rules.fence = withoutNewLine(md.renderer.rules.fence);
         md.renderer.rules.code_block = withoutNewLine(md.renderer.rules.code_block);
         md.renderer.renderToken = withoutNewLine(md.renderer.renderToken.bind(md.renderer));
+
+
+            // Patch block-level tokens to inject line number data attributes from token.map
+            const addLineDataAttrs = (tokens, idx, options, env, self) => {
+            const token = tokens[idx];
+            if (token.map) {
+                // console.log(token.map)
+                // token.map is typically an array: [startLine, endLine]
+                token.attrPush(['data-line-start', token.map[0]]);
+                token.attrPush(['data-line-end', token.map[1]]);
+                token.attrPush(['test', 'test']);
+            }
+            return self.renderToken(tokens, idx, options);
+            };
+
+            // Override the opening tag rules for block-level tokens
+            md.renderer.rules.paragraph_open = addLineDataAttrs;
+            md.renderer.rules.heading_open = addLineDataAttrs;
+            md.renderer.rules.bullet_list_open = addLineDataAttrs;
+            md.renderer.rules.ordered_list_open = addLineDataAttrs;
+            md.renderer.rules.blockquote_open = addLineDataAttrs;
+            // Add additional block tokens as needed...
+
 
         return md;
     }
