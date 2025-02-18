@@ -828,7 +828,6 @@ class MarkdownParser {
         }, this.md);
       });
       const renderedHTML = this.md.render(content);
-      console.log(renderedHTML);
       const element = elementFromString(renderedHTML);
       this.editor.extensionManager.extensions.forEach((extension) => {
         var _getMarkdownSpec2;
