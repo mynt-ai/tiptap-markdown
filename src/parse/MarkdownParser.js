@@ -28,7 +28,6 @@ export class MarkdownParser {
             );
 
             const renderedHTML = this.md.render(content);
-            
             const element = elementFromString(renderedHTML);
 
             this.editor.extensionManager.extensions.forEach(extension =>
@@ -132,17 +131,35 @@ export class MarkdownParser {
                 // token.map is typically an array: [startLine, endLine]
                 token.attrPush(['data-line-start', token.map[0]]);
                 token.attrPush(['data-line-end', token.map[1]]);
-                token.attrPush(['test', 'test']);
             }
             return self.renderToken(tokens, idx, options);
             };
 
+            const addLineDataAttrsToRenderer = (renderer) => (tokens, idx, options, env, slf) => {
+                const token = tokens[idx];
+                if (token.map) {
+                    token.attrPush(['data-line-start', token.map[0]]);
+                    token.attrPush(['data-line-end', token.map[1]]);
+                }
+                return renderer(tokens, idx, options, env, slf);;
+            }
+
             // Override the opening tag rules for block-level tokens
+            md.renderer.rules.blockquote_open = addLineDataAttrs;
+            md.renderer.rules.bullet_list_open = addLineDataAttrs;
             md.renderer.rules.paragraph_open = addLineDataAttrs;
             md.renderer.rules.heading_open = addLineDataAttrs;
-            md.renderer.rules.bullet_list_open = addLineDataAttrs;
             md.renderer.rules.ordered_list_open = addLineDataAttrs;
-            md.renderer.rules.blockquote_open = addLineDataAttrs;
+            md.renderer.rules.code_block = addLineDataAttrsToRenderer(md.renderer.rules.code_block);
+            md.renderer.rules.fence = addLineDataAttrsToRenderer(md.renderer.rules.fence);     
+            md.renderer.rules.image = addLineDataAttrsToRenderer(md.renderer.rules.image);     
+   
+            md.renderer.rules.list_item_open = addLineDataAttrs;
+            // md.renderer.rules.table_open = addLineDataAttrs;
+            md.renderer.rules.tbody_open = addLineDataAttrs;
+            md.renderer.rules.tr_open = addLineDataAttrs;
+            md.renderer.rules.hr = addLineDataAttrs;
+
             // Add additional block tokens as needed...
 
 

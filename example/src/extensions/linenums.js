@@ -9,7 +9,8 @@ const GlobalLineMapping = Extension.create({
       {
         // Specify the node types you want to extend.
         // Adjust this array based on your needs.
-        types: ['paragraph', 'heading', 'bulletList', 'orderedList', 'blockquote', 'codeBlock'],
+        // removed: 'blockquote',
+        types: ['paragraph', 'heading', 'bulletList', 'orderedList', 'codeBlock', 'listItem', 'taskItem', 'horizontalRule', 'image', 'tableRow'],
         attributes: {
           dataLineStart: {
             default: '',

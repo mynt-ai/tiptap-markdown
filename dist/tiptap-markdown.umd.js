@@ -826,6 +826,7 @@ ${element.innerHTML}
           }, this.md);
         });
         const renderedHTML = this.md.render(content);
+        console.log(renderedHTML);
         const element = elementFromString(renderedHTML);
         this.editor.extensionManager.extensions.forEach((extension) => {
           var _getMarkdownSpec2;
@@ -916,15 +917,29 @@ ${element.innerHTML}
         if (token.map) {
           token.attrPush(["data-line-start", token.map[0]]);
           token.attrPush(["data-line-end", token.map[1]]);
-          token.attrPush(["test", "test"]);
         }
         return self2.renderToken(tokens, idx, options);
       };
+      const addLineDataAttrsToRenderer = (renderer) => (tokens, idx, options, env, slf) => {
+        const token = tokens[idx];
+        if (token.map) {
+          token.attrPush(["data-line-start", token.map[0]]);
+          token.attrPush(["data-line-end", token.map[1]]);
+        }
+        return renderer(tokens, idx, options, env, slf);
+      };
+      md2.renderer.rules.blockquote_open = addLineDataAttrs;
+      md2.renderer.rules.bullet_list_open = addLineDataAttrs;
       md2.renderer.rules.paragraph_open = addLineDataAttrs;
       md2.renderer.rules.heading_open = addLineDataAttrs;
-      md2.renderer.rules.bullet_list_open = addLineDataAttrs;
       md2.renderer.rules.ordered_list_open = addLineDataAttrs;
-      md2.renderer.rules.blockquote_open = addLineDataAttrs;
+      md2.renderer.rules.code_block = addLineDataAttrsToRenderer(md2.renderer.rules.code_block);
+      md2.renderer.rules.fence = addLineDataAttrsToRenderer(md2.renderer.rules.fence);
+      md2.renderer.rules.image = addLineDataAttrsToRenderer(md2.renderer.rules.image);
+      md2.renderer.rules.list_item_open = addLineDataAttrs;
+      md2.renderer.rules.tbody_open = addLineDataAttrs;
+      md2.renderer.rules.tr_open = addLineDataAttrs;
+      md2.renderer.rules.hr = addLineDataAttrs;
       return md2;
     }
   }
