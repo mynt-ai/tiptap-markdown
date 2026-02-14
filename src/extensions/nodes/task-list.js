@@ -1,6 +1,10 @@
-import taskListPlugin from "markdown-it-task-lists";
 import { Node } from "@tiptap/core";
 import BulletList from "./bullet-list";
+
+// `markdown-it-task-lists` is CommonJS. Some bundlers/dev servers may not apply
+// CJS→ESM interop, so avoid a static default import and normalize at runtime.
+import * as taskListsPluginModule from "markdown-it-task-lists";
+const taskListPlugin = taskListsPluginModule?.default ?? taskListsPluginModule;
 
 
 const TaskList = Node.create({

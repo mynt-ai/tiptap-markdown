@@ -1,6 +1,6 @@
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("@tiptap/core"), require("prosemirror-markdown"), require("markdown-it"), require("@tiptap/pm/model"), require("markdown-it-task-lists"), require("@tiptap/pm/state")) : typeof define === "function" && define.amd ? define(["exports", "@tiptap/core", "prosemirror-markdown", "markdown-it", "@tiptap/pm/model", "markdown-it-task-lists", "@tiptap/pm/state"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["tiptap-markdown"] = {}, global.core, global.prosemirrorMarkdown, global.markdownit, global.model, global.taskListPlugin, global.state));
-})(this, function(exports2, core, prosemirrorMarkdown, markdownit, model, taskListPlugin, state) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports, require("@tiptap/core"), require("prosemirror-markdown"), require("markdown-it"), require("@tiptap/pm/model"), require("@tiptap/pm/state")) : typeof define === "function" && define.amd ? define(["exports", "@tiptap/core", "prosemirror-markdown", "markdown-it", "@tiptap/pm/model", "@tiptap/pm/state"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global["tiptap-markdown"] = {}, global.core, global.prosemirrorMarkdown, global.markdownit, global.model, global.state));
+})(this, function(exports2, core, prosemirrorMarkdown, markdownit, model, state) {
   "use strict";var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => {
@@ -8,6 +8,25 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 
+  function _mergeNamespaces(n, m) {
+    for (var i = 0; i < m.length; i++) {
+      const e = m[i];
+      if (typeof e !== "string" && !Array.isArray(e)) {
+        for (const k in e) {
+          if (k !== "default" && !(k in n)) {
+            const d = Object.getOwnPropertyDescriptor(e, k);
+            if (d) {
+              Object.defineProperty(n, k, d.get ? d : {
+                enumerable: true,
+                get: () => e[k]
+              });
+            }
+          }
+        }
+      }
+    }
+    return Object.freeze(Object.defineProperty(n, Symbol.toStringTag, { value: "Module" }));
+  }
   const MarkdownTightLists = core.Extension.create({
     name: "markdownTightLists",
     addOptions: () => ({
@@ -118,8 +137,8 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "inTable", false);
       this.inlines = [];
     }
-    render(node, parent, index) {
-      super.render(node, parent, index);
+    render(node, parent, index2) {
+      super.render(node, parent, index2);
       const top = this.inlines[this.inlines.length - 1];
       if (top !== null && top !== void 0 && top.start && top !== null && top !== void 0 && top.end) {
         const {
@@ -131,7 +150,7 @@ var __publicField = (obj, key, value) => {
         this.inlines.pop();
       }
     }
-    markString(mark, open, parent, index) {
+    markString(mark, open, parent, index2) {
       const info = this.marks[mark.type.name];
       if (info.expelEnclosingWhitespace) {
         if (open) {
@@ -147,7 +166,7 @@ var __publicField = (obj, key, value) => {
           });
         }
       }
-      return super.markString(mark, open, parent, index);
+      return super.markString(mark, open, parent, index2);
     }
     normalizeInline(inline) {
       let {
@@ -349,8 +368,8 @@ ${element.innerHTML}
     addStorage() {
       return {
         markdown: {
-          serialize(state2, node, parent, index) {
-            for (let i = index + 1; i < parent.childCount; i++)
+          serialize(state2, node, parent, index2) {
+            for (let i = index2 + 1; i < parent.childCount; i++)
               if (parent.child(i).type != node.type) {
                 state2.write(state2.inTable ? HTMLNode.storage.markdown.serialize.call(this, state2, node, parent) : "\\\n");
                 return;
@@ -438,10 +457,10 @@ ${element.innerHTML}
   const OrderedList = core.Node.create({
     name: "orderedList"
   });
-  function findIndexOfAdjacentNode(node, parent, index) {
+  function findIndexOfAdjacentNode(node, parent, index2) {
     let i = 0;
-    for (; index - i > 0; i++) {
-      if (parent.child(index - i - 1).type.name !== node.type.name) {
+    for (; index2 - i > 0; i++) {
+      if (parent.child(index2 - i - 1).type.name !== node.type.name) {
         break;
       }
     }
@@ -454,11 +473,11 @@ ${element.innerHTML}
     addStorage() {
       return {
         markdown: {
-          serialize(state2, node, parent, index) {
+          serialize(state2, node, parent, index2) {
             const start = node.attrs.start || 1;
             const maxW = String(start + node.childCount - 1).length;
             const space = state2.repeat(" ", maxW + 2);
-            const adjacentIndex = findIndexOfAdjacentNode(node, parent, index);
+            const adjacentIndex = findIndexOfAdjacentNode(node, parent, index2);
             const separator = adjacentIndex % 2 ? ") " : ". ";
             state2.renderList(node, space, (i) => {
               const nStr = String(start + i);
@@ -587,6 +606,111 @@ ${element.innerHTML}
       };
     }
   });
+  function getDefaultExportFromCjs(x) {
+    return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+  }
+  var disableCheckboxes = true;
+  var useLabelWrapper = false;
+  var useLabelAfter = false;
+  var markdownItTaskLists = function(md2, options) {
+    if (options) {
+      disableCheckboxes = !options.enabled;
+      useLabelWrapper = !!options.label;
+      useLabelAfter = !!options.labelAfter;
+    }
+    md2.core.ruler.after("inline", "github-task-lists", function(state2) {
+      var tokens = state2.tokens;
+      for (var i = 2; i < tokens.length; i++) {
+        if (isTodoItem(tokens, i)) {
+          todoify(tokens[i], state2.Token);
+          attrSet(tokens[i - 2], "class", "task-list-item" + (!disableCheckboxes ? " enabled" : ""));
+          attrSet(tokens[parentToken(tokens, i - 2)], "class", "contains-task-list");
+        }
+      }
+    });
+  };
+  function attrSet(token, name, value) {
+    var index2 = token.attrIndex(name);
+    var attr = [name, value];
+    if (index2 < 0) {
+      token.attrPush(attr);
+    } else {
+      token.attrs[index2] = attr;
+    }
+  }
+  function parentToken(tokens, index2) {
+    var targetLevel = tokens[index2].level - 1;
+    for (var i = index2 - 1; i >= 0; i--) {
+      if (tokens[i].level === targetLevel) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  function isTodoItem(tokens, index2) {
+    return isInline(tokens[index2]) && isParagraph(tokens[index2 - 1]) && isListItem(tokens[index2 - 2]) && startsWithTodoMarkdown(tokens[index2]);
+  }
+  function todoify(token, TokenConstructor) {
+    token.children.unshift(makeCheckbox(token, TokenConstructor));
+    token.children[1].content = token.children[1].content.slice(3);
+    token.content = token.content.slice(3);
+    if (useLabelWrapper) {
+      if (useLabelAfter) {
+        token.children.pop();
+        var id = "task-item-" + Math.ceil(Math.random() * (1e4 * 1e3) - 1e3);
+        token.children[0].content = token.children[0].content.slice(0, -1) + ' id="' + id + '">';
+        token.children.push(afterLabel(token.content, id, TokenConstructor));
+      } else {
+        token.children.unshift(beginLabel(TokenConstructor));
+        token.children.push(endLabel(TokenConstructor));
+      }
+    }
+  }
+  function makeCheckbox(token, TokenConstructor) {
+    var checkbox = new TokenConstructor("html_inline", "", 0);
+    var disabledAttr = disableCheckboxes ? ' disabled="" ' : "";
+    if (token.content.indexOf("[ ] ") === 0) {
+      checkbox.content = '<input class="task-list-item-checkbox"' + disabledAttr + 'type="checkbox">';
+    } else if (token.content.indexOf("[x] ") === 0 || token.content.indexOf("[X] ") === 0) {
+      checkbox.content = '<input class="task-list-item-checkbox" checked=""' + disabledAttr + 'type="checkbox">';
+    }
+    return checkbox;
+  }
+  function beginLabel(TokenConstructor) {
+    var token = new TokenConstructor("html_inline", "", 0);
+    token.content = "<label>";
+    return token;
+  }
+  function endLabel(TokenConstructor) {
+    var token = new TokenConstructor("html_inline", "", 0);
+    token.content = "</label>";
+    return token;
+  }
+  function afterLabel(content, id, TokenConstructor) {
+    var token = new TokenConstructor("html_inline", "", 0);
+    token.content = '<label class="task-list-item-label" for="' + id + '">' + content + "</label>";
+    token.attrs = [{ for: id }];
+    return token;
+  }
+  function isInline(token) {
+    return token.type === "inline";
+  }
+  function isParagraph(token) {
+    return token.type === "paragraph_open";
+  }
+  function isListItem(token) {
+    return token.type === "list_item_open";
+  }
+  function startsWithTodoMarkdown(token) {
+    return token.content.indexOf("[ ] ") === 0 || token.content.indexOf("[x] ") === 0 || token.content.indexOf("[X] ") === 0;
+  }
+  const index = /* @__PURE__ */ getDefaultExportFromCjs(markdownItTaskLists);
+  const taskListsPluginModule = /* @__PURE__ */ _mergeNamespaces({
+    __proto__: null,
+    default: index
+  }, [markdownItTaskLists]);
+  var _taskListsPluginModul;
+  const taskListPlugin = (_taskListsPluginModul = taskListsPluginModule === null || taskListsPluginModule === void 0 ? void 0 : index) !== null && _taskListsPluginModul !== void 0 ? _taskListsPluginModul : taskListsPluginModule;
   const TaskList = core.Node.create({
     name: "taskList"
   });
@@ -997,8 +1121,8 @@ ${element.innerHTML}
     addCommands() {
       const commands = core.extensions.Commands.config.addCommands();
       return {
-        setContent: (content, emitUpdate, parseOptions) => (props) => {
-          return commands.setContent(props.editor.storage.markdown.parser.parse(content), emitUpdate, parseOptions)(props);
+        setContent: (content, options) => (props) => {
+          return commands.setContent(props.editor.storage.markdown.parser.parse(content), options)(props);
         },
         insertContentAt: (range, content, options) => (props) => {
           return commands.insertContentAt(range, props.editor.storage.markdown.parser.parse(content, {

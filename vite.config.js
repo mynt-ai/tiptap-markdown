@@ -19,7 +19,9 @@ export default defineConfig(() => {
             },
             rollupOptions: {
                 external: [
-                    ...Object.keys(deps),
+                    // Bundle `markdown-it-task-lists` to avoid relying on consumer-side
+                    // CJS↔ESM interop (e.g. Nuxt/Vite serving it as a raw ESM module).
+                    ...Object.keys(deps).filter(dep => dep !== 'markdown-it-task-lists'),
                     /^@tiptap/,
                 ],
             },
